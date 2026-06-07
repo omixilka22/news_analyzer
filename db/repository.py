@@ -41,3 +41,18 @@ def get_articles_df():
         return None
     finally:
         conn.close()
+
+def get_latest_article_date():
+    conn = get_connection()
+    if not conn:
+        return None
+    try:
+        cursor = conn.cursor()
+        cursor.execute("SELECT MAX(published_at) FROM articles")
+        result = cursor.fetchone()
+        return result[0] if result else None
+    except Exception as e:
+        print(e)
+        return None
+    finally:
+        conn.close()

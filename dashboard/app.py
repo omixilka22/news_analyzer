@@ -10,14 +10,11 @@ import seaborn as sns
 
 st.set_page_config(page_title="News Analyzer", layout="wide")
 
-@st.cache_data
+@st.cache_data(ttl=300)
 def load_data():
     return get_articles_df()
 
 df = load_data()
-
-st.title("📰 News Sentiment Analyzer")
-st.subheader("Аналіз новин unian.ua")
 
 # Sidebar
 st.sidebar.title("Фільтри")
@@ -26,11 +23,51 @@ sentiment_filter = st.sidebar.selectbox(
     ["all", "positive", "negative", "neutral"]
 )
 
+st.sidebar.divider()
+st.sidebar.markdown("### 🔄 Оновлення даних")
+
+if st.sidebar.button("Оновити новини"):
+    from scrapy.scraper import fetch_articles
+    from db.repository import insert_article, get_latest_article_date
+    from analysis.sentiment import analyze_df, save_sentiments
+    from datetime import datetime, timezone
+
+    latest = get_latest_article_date()
+    if latest:
+        diff = datetime.now(timezone.utc) - latest.replace(tzinfo=timezone.utc)
+        if diff.total_seconds() < 3600:
+            st.sidebar.warning("Нових новин немає — дані актуальні!")
+        else:
+            with st.spinner("Збираємо новини..."):
+                articles = fetch_articles(limit=50)
+                for article in articles:
+                    insert_article(article)
+            with st.spinner("Аналізуємо sentiment..."):
+                df_new = get_articles_df()
+                df_new = analyze_df(df_new)
+                save_sentiments(df_new)
+            st.sidebar.success(f"Додано {len(articles)} нових статей!")
+            st.cache_data.clear()
+            st.rerun()
+    else:
+        with st.spinner("Перший збір даних..."):
+            articles = fetch_articles(limit=50)
+            for article in articles:
+                insert_article(article)
+        st.sidebar.success("Дані завантажено!")
+        st.cache_data.clear()
+        st.rerun()
+
+if df is None or df.empty:
+    st.warning("База даних порожня. Натисніть 'Оновити новини' в меню зліва.")
+    st.stop()
+
 if sentiment_filter != "all":
     df = df[df["sentiment"] == sentiment_filter]
 
-# Метрики
-st.markdown("📊 Загальна статистика")
+st.title("📰 News Sentiment Analyzer")
+st.subheader("Аналіз новин unian.ua")
+
 col1, col2, col3, col4 = st.columns(4)
 col1.metric("Всього статей", len(df))
 col2.metric("Негативних", len(df[df["sentiment"] == "negative"]))
@@ -39,7 +76,6 @@ col4.metric("Позитивних", len(df[df["sentiment"] == "positive"]))
 
 st.divider()
 
-# Таблиця
 st.markdown("### 📋 Статті")
 st.dataframe(
     df[["title", "published_at", "sentiment", "content"]],
@@ -48,7 +84,6 @@ st.dataframe(
 
 st.divider()
 
-# Графіки
 st.markdown("### 📈 Візуалізація")
 col1, col2 = st.columns(2)
 
