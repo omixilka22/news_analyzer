@@ -179,7 +179,3 @@ streamlit run dashboard/app.py
 ```
 
 ---
-
-## 📄 License
-
-MIT
