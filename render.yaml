@@ -1,5 +1,5 @@
 services:
-  # 1. Твій Streamlit дашборд (Web Service)
+  # 1. Твій Streamlit дашборд
   - type: web
     name: news-analyzer-dashboard
     env: docker
@@ -7,7 +7,6 @@ services:
     plan: free
     dockerfilePath: Dockerfile
     dockerContext: .
-    # ВИПРАВЛЕНО: Для env: docker використовується саме dockerCommand
     dockerCommand: streamlit run dashboard/app.py --server.port $PORT --server.address 0.0.0.0
     envVars:
       - key: DATABASE_URL
@@ -15,21 +14,21 @@ services:
           name: news-analyzer-db
           property: connectionString
 
-  # 2. Твій планувальник/скрапер (Background Worker)
-  - type: worker
+  # 2. Твій безкоштовний Cron Job (Запуск кожні 6 годин)
+  - type: cron
     name: news-analyzer-scheduler
     env: docker
     repo: https://github.com/omixilka22/news_analyzer.git
     plan: free
     dockerfilePath: Dockerfile
     dockerContext: .
-    # ВИПРАВЛЕНО: Тут так само міняємо на dockerCommand
+    # ВИПРАВЛЕНО: розклад на кожні 6 годин
+    schedule: "0 */6 * * *"
     dockerCommand: python scheduler.py
     envVars:
       - key: DATABASE_URL
         fromDatabase:
           name: news-analyzer-db
           property: connectionString
-      # Токен для Hugging Face
       - key: HF_TOKEN
         sync: false
