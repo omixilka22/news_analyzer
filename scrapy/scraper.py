@@ -42,10 +42,10 @@ def parse_article(url) -> Optional[Article]:
         )
     return None
 
-def fetch_articles() -> List[Article]:
+def fetch_articles(limit=20) -> List[Article]:
     links = get_article_links("https://www.unian.ua/war")
     articles = []
-    for link in links:
+    for link in links[:limit]:
         article = parse_article(link)
         if article:
             articles.append(article)
