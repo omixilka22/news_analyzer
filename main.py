@@ -30,3 +30,5 @@ if __name__ == "__main__":
     plot_sentiment_distribution(df)
     plot_top_words(df)
     plot_daily_stats(df)
+
+    print(df.columns.tolist())

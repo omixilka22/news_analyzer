@@ -1,0 +1,32 @@
+services:
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: news_analyzer
+      POSTGRES_USER: pro
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./db/schemas.sql:/docker-entrypoint-initdb.d/schemas.sql
+
+  app:
+    build: .
+    ports:
+      - "8501:8501"
+    depends_on:
+      - db
+    env_file:
+      - .env
+
+  scheduler:
+    build: .
+    command: python scheduler.py
+    depends_on:
+      - db
+    env_file:
+      - .env
+
+volumes:
+  postgres_data:
