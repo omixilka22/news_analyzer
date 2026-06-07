@@ -33,14 +33,12 @@ def parse_article(url) -> Optional[Article]:
         article_div = soup.find("div", class_="article-text")
         paragraphs = article_div.find_all("p")
         content = " ".join([p.text.strip() for p in paragraphs])
-        description = paragraphs[0].text.strip() if paragraphs else None
         return Article(
             title=header,
             url=url,
             source="unian.ua",
             published_at=published_at,
             content=content,
-            description=description
         )
     return None
 

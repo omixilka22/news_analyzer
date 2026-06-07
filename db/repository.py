@@ -8,12 +8,11 @@ def insert_article(article: Article):
         return
     try:
         cursor = conn.cursor()
-        insert_query = ("INSERT INTO articles (title, description, url , source, published_at, content) "
-                        "VALUES (%s, %s, %s ,%s, %s, %s) "
+        insert_query = ("INSERT INTO articles (title, url , source, published_at, content) "
+                        "VALUES (%s, %s ,%s, %s, %s) "
                         "ON CONFLICT (url) DO NOTHING")
         cursor.execute(insert_query, (
             article.title,
-            article.description,
             article.url,
             article.source,
             article.published_at,
