@@ -15,3 +15,5 @@ ENV/
 *.jpg
 *.jpeg
 *.log
+
+.env

@@ -5,6 +5,5 @@ CREATE TABLE IF NOT EXISTS articles (
     source VARCHAR(100) NOT NULL,
     published_at TIMESTAMP NOT NULL,
     content TEXT NOT NULL,
-    description TEXT,
     sentiment VARCHAR(50)
 );
