@@ -29,7 +29,15 @@ def parse_article(url) -> Optional[Article]:
         soup = BeautifulSoup(response.text, "lxml")
         header = soup.find("h1").text
         time_raw = soup.find("div", class_=["article__info-item", "time"]).text.strip()
-        published_at = datetime.strptime(time_raw, "%H:%M, %d.%m.%y")
+        for fmt in ("%H:%M, %d.%m.%Y", "%H:%M, %d.%m.%y"):
+            try:
+                published_at = datetime.strptime(time_raw, fmt)
+                break
+            except ValueError:
+                continue
+        else:
+            print(f"Невідомий формат дати: {time_raw!r} ({url})")
+            return None
         article_div = soup.find("div", class_="article-text")
         paragraphs = article_div.find_all("p")
         content = " ".join([p.text.strip() for p in paragraphs])
@@ -42,10 +50,10 @@ def parse_article(url) -> Optional[Article]:
         )
     return None
 
-def fetch_articles(limit=20) -> List[Article]:
+def fetch_articles() -> List[Article]:
     links = get_article_links("https://www.unian.ua/war")
     articles = []
-    for link in links[:limit]:
+    for link in links:
         article = parse_article(link)
         if article:
             articles.append(article)
