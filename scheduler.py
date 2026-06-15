@@ -23,7 +23,7 @@ def run_scraper():
                 logging.info("Нових новин немає — пропускаємо")
                 return
         logging.info("Починаємо збір новин...")
-        articles = fetch_articles()
+        articles = fetch_articles(since=latest)
         for article in articles:
             insert_article(article)
         logging.info(f"Зібрано та збережено {len(articles)} статей")

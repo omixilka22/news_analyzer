@@ -39,7 +39,7 @@ if st.sidebar.button("Оновити новини"):
             st.sidebar.warning("Нових новин немає — дані актуальні!")
         else:
             with st.spinner("Збираємо новини..."):
-                articles = fetch_articles(limit=50)
+                articles = fetch_articles(since=latest)
                 for article in articles:
                     insert_article(article)
             with st.spinner("Аналізуємо sentiment..."):
@@ -51,7 +51,7 @@ if st.sidebar.button("Оновити новини"):
             st.rerun()
     else:
         with st.spinner("Перший збір даних..."):
-            articles = fetch_articles(limit=50)
+            articles = fetch_articles()
             for article in articles:
                 insert_article(article)
         st.sidebar.success("Дані завантажено!")
